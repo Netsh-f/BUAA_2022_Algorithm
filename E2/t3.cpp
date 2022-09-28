@@ -40,7 +40,13 @@ int main(){
 	scanf("%d", &t);
 	while(t--){
 		scanf("%d %d", &n, &m);
-		if(m>c[n][n/2]){
+		if(n==1){
+			if(m==1){
+				printf("1 1\n");
+			}else{
+				printf("-1\n");
+			}
+		}else if(m>c[n][n/2]){
 			printf("-1\n");
 		}else{
 			cnt = 0;
