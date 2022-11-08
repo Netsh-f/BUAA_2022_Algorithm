@@ -5,28 +5,32 @@ using namespace std;
 const int MAXN = 105;
 const int MAXM = 5005;
 const long long INF = 1e15;
-int depth[MAXN], cur[MAXN], head[MAXN], cntEdge = 0;
+int depth[MAXN], cur[MAXN], head[MAXN], cntEdge = 1;
 struct edge{
-	int u, v, flow, next, rev;
-}e[MAXN];
-void add(int u, int v, int w){
-	e[++cntEdge].u = u;
-	e[cntEdge].v = v;
+	int v, flow, next;
+}e[MAXM*2];
+void add(int u, int v, int w){//i^1是翻边 从2开始 2^1=3 
+	e[++cntEdge].v = v;
 	e[cntEdge].flow = w;
 	e[cntEdge].next = head[u];
-	if(head[u] != 0){
-		e[head[u]].rev = cntEdge;
-	}
 	head[u] = cntEdge;
+	
+	e[++cntEdge].v = u;
+	e[cntEdge].flow = 0;
+	e[cntEdge].next = head[v];
+	head[v] = cntEdge;
 }
 void init(){
 	memset(head, 0, sizeof head);
-	cntEdge = 0;
+	cntEdge = 1;
 }
 
 bool BFS(int s, int t){
 	memset(depth, 0, sizeof(depth));
 	queue<int> q;
+	while(!q.empty()){
+		q.pop();
+	}
 	q.push(s);
 	depth[s] = 1;
 	cur[s] = head[s];
@@ -37,15 +41,12 @@ bool BFS(int s, int t){
 			if(e[i].flow > 0 && depth[e[i].v] == 0){
 				depth[e[i].v] = depth[s] + 1;
 				cur[e[i].v] = head[e[i].v];
-//				if(e[i].v == t){
-//					return true;
-//				}
+				if(e[i].v == t){
+					return true;
+				}
 				q.push(e[i].v);
-			} 
+			}
 		}
-	}
-	if(depth[t] != 0){
-		return true;
 	}
 	return false;
 }
@@ -54,7 +55,7 @@ long long DFS(int s, long long flow, int t){
 		return flow;
 	}
 	long long rest = flow;
-	for(int i=cur[s]; i!=0; i=e[i].next){
+	for(int i=head[s]; i!=0; i=e[i].next){
 		if(e[i].flow > 0 && depth[e[i].v] == depth[s] + 1){
 			long long tmp = DFS(e[i].v, min(rest, (long long)e[i].flow), t);
 			if(tmp <= 0){//将depth置0意味着将忽视这个点 
@@ -62,7 +63,7 @@ long long DFS(int s, long long flow, int t){
 			}
 			rest -= tmp;
 			e[i].flow -= tmp;
-//			e[e[i].rev].flow += tmp;
+			e[i ^ 1].flow += tmp;
 			if(rest <= 0){
 				break;
 			}
